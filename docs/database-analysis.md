@@ -1,193 +1,177 @@
-# 🗄️ Análisis de Base de Datos — Chistes-Nicolas
+# 📊 Análisis de Base de Datos — Chistes-Nicolas
 
 ## Índice
 
-1. [Resumen](#resumen)
+1. [Descripción general](#descripción-general)
 2. [Tablas](#tablas)
-3. [Detalle de cada tabla](#detalle-de-cada-tabla)
-4. [Relaciones](#relaciones)
-5. [Diagrama ER](#diagrama-er)
-6. [Índices recomendados](#índices-recomendados)
-7. [Datos iniciales (seed)](#datos-iniciales-seed)
+3. [Diagrama de relaciones](#diagrama-de-relaciones)
+4. [Script de creación](#script-de-creación)
 
 ---
 
-## Resumen
+## Descripción general
 
-La base de datos es sencilla y está diseñada para soportar un CRUD completo de chistes organizados por categorías, con la posibilidad de obtener chistes aleatorios filtrados por categoría.
+La base de datos almacena chistes organizados por categorías. El diseño es sencillo y pensado para escalar si en el futuro se añaden funcionalidades como usuarios, votaciones o favoritos.
 
-**Motor:** PostgreSQL  
-**Esquema:** `public`  
-**Tablas:** 2 (`categories`, `jokes`)
+**Motor:** PostgreSQL
 
 ---
 
 ## Tablas
 
-| Tabla | Descripción | Registros esperados |
-|-------|-------------|---------------------|
-| `categories` | Catálogo de categorías de chistes | Decenas |
-| `jokes` | Chistes almacenados con su categoría | Cientos/Miles |
-
----
-
-## Detalle de cada tabla
-
-### 📁 `categories`
+### `categories` — Categorías de chistes
 
 Almacena las categorías disponibles para clasificar los chistes.
 
-| Columna | Tipo | Restricciones | Descripción |
-|---------|------|---------------|-------------|
-| `id` | `SERIAL` | `PRIMARY KEY` | Identificador único autoincremental |
-| `name` | `VARCHAR(100)` | `NOT NULL`, `UNIQUE` | Nombre de la categoría (ej: "Humor negro", "Dad jokes") |
-| `description` | `TEXT` | `NULL` | Descripción opcional de la categoría |
-| `created_at` | `TIMESTAMP` | `NOT NULL`, `DEFAULT NOW()` | Fecha de creación |
-| `updated_at` | `TIMESTAMP` | `NOT NULL`, `DEFAULT NOW()` | Fecha de última modificación |
+| Columna      | Tipo                     | Restricciones             | Descripción                              |
+|--------------|--------------------------|---------------------------|------------------------------------------|
+| `id`         | `SERIAL`                 | `PRIMARY KEY`             | Identificador único auto-incremental     |
+| `name`       | `VARCHAR(100)`           | `NOT NULL`, `UNIQUE`      | Nombre de la categoría                   |
+| `description`| `VARCHAR(255)`           |                           | Descripción opcional de la categoría     |
+| `created_at` | `TIMESTAMP`              | `DEFAULT CURRENT_TIMESTAMP` | Fecha de creación                      |
+| `updated_at` | `TIMESTAMP`              | `DEFAULT CURRENT_TIMESTAMP` | Fecha de última modificación           |
 
-**Notas:**
-- El campo `name` es único para evitar categorías duplicadas.
-- `description` es opcional, permite dar contexto sobre qué tipo de chistes pertenecen a esa categoría.
+**Ejemplos de categorías:** Humor negro, Dad jokes, Chistes malos, De
 
----
+, De
 
-### 🃏 `jokes`
+, Trabalenguas, etc.
 
-Almacena los chistes con referencia a su categoría.
-
-| Columna | Tipo | Restricciones | Descripción |
-|---------|------|---------------|-------------|
-| `id` | `SERIAL` | `PRIMARY KEY` | Identificador único autoincremental |
-| `title` | `VARCHAR(200)` | `NOT NULL` | Título o resumen corto del chiste |
-| `content` | `TEXT` | `NOT NULL` | El chiste completo |
-| `category_id` | `INTEGER` | `NOT NULL`, `FOREIGN KEY → categories(id)` | Categoría a la que pertenece |
-| `created_at` | `TIMESTAMP` | `NOT NULL`, `DEFAULT NOW()` | Fecha de creación |
-| `updated_at` | `TIMESTAMP` | `NOT NULL`, `DEFAULT NOW()` | Fecha de última modificación |
-
-**Notas:**
-- `title` permite identificar rápidamente el chiste en listados sin mostrar el contenido completo.
-- `content` almacena el chiste en texto plano. Puede contener saltos de línea para chistes con formato pregunta/respuesta.
-- `category_id` es obligatorio: todo chiste debe pertenecer a una categoría.
-- La foreign key tiene `ON DELETE RESTRICT` para evitar borrar categorías que tengan chistes asociados.
+**Índices:**
+- `PK` en `id`
+- `UNIQUE` en `name` (evita categorías duplicadas)
 
 ---
 
-## Relaciones
+### `jokes` — Chistes
+
+Almacena los chistes con su contenido y la categoría a la que pertenecen.
+
+| Columna       | Tipo                     | Restricciones                          | Descripción                              |
+|---------------|--------------------------|----------------------------------------|------------------------------------------|
+| `id`          | `SERIAL`                 | `PRIMARY KEY`                          | Identificador único auto-incremental     |
+| `title`       | `VARCHAR(200)`           | `NOT NULL`                             | Título o resumen corto del chiste        |
+| `content`     | `TEXT`                   | `NOT NULL`                             | El chiste completo                       |
+| `category_id` | `INTEGER`                | `NOT NULL`, `FOREIGN KEY → categories(id)` | Categoría a la que pertenece         |
+| `created_at`  | `TIMESTAMP`              | `DEFAULT CURRENT_TIMESTAMP`            | Fecha de creación                        |
+| `updated_at`  | `TIMESTAMP`              | `DEFAULT CURRENT_TIMESTAMP`            | Fecha de última modificación             |
+
+**Relación:** Cada chiste pertenece a **una categoría** (`category_id`). Una categoría puede tener **muchos chistes** (1:N).
+
+**Índices:**
+- `PK` en `id`
+- `FK` en `category_id` → `categories(id)` con `ON DELETE RESTRICT` (no se puede borrar una categoría si tiene chistes asociados)
+- Índice en `category_id` (optimiza búsquedas por categoría y la consulta aleatoria)
+
+---
+
+## Diagrama de relaciones
 
 ```
-categories (1) ──────── (N) jokes
-    │                        │
-    │ id ◄──── category_id   │
-    │                        │
+┌─────────────────────────┐       ┌─────────────────────────────┐
+│       categories        │       │           jokes             │
+├─────────────────────────┤       ├─────────────────────────────┤
+│ id          SERIAL   PK │◄──┐   │ id            SERIAL   PK   │
+│ name        VARCHAR(100)│   │   │ title         VARCHAR(200)  │
+│ description VARCHAR(255)│   │   │ content       TEXT           │
+│ created_at  TIMESTAMP   │   └───│ category_id   INTEGER  FK   │
+│ updated_at  TIMESTAMP   │       │ created_at    TIMESTAMP     │
+└─────────────────────────┘       │ updated_at    TIMESTAMP     │
+                                  └─────────────────────────────┘
+
+Relación: categories (1) ──────── (N) jokes
 ```
 
-- **Una categoría** puede tener **muchos chistes** (1:N)
-- **Un chiste** pertenece a **una sola categoría** (N:1)
-- No se permite borrar una categoría si tiene chistes asociados (`ON DELETE RESTRICT`)
+### Diagrama Mermaid
 
----
-
-## Diagrama ER
-
+```mermaid
+erDiagram
+    CATEGORIES {
+        int id PK
+        varchar name UK
+        varchar description
+        timestamp created_at
+        timestamp updated_at
+    }
+    JOKES {
+        int id PK
+        varchar title
+        text content
+        int category_id FK
+        timestamp created_at
+        timestamp updated_at
+    }
+    CATEGORIES ||--o{ JOKES : "tiene muchos"
 ```
-┌─────────────────────────┐          ┌─────────────────────────────┐
-│       categories        │          │           jokes             │
-├─────────────────────────┤          ├─────────────────────────────┤
-│ PK  id         SERIAL   │──┐       │ PK  id          SERIAL     │
-│     name       VARCHAR   │  │       │     title       VARCHAR    │
-│     description TEXT     │  │       │     content     TEXT       │
-│     created_at TIMESTAMP │  └──────>│ FK  category_id INTEGER    │
-│     updated_at TIMESTAMP │          │     created_at  TIMESTAMP  │
-└─────────────────────────┘          │     updated_at  TIMESTAMP  │
-                                     └─────────────────────────────┘
-```
 
 ---
 
-## Índices recomendados
-
-| Índice | Tabla | Columna(s) | Tipo | Justificación |
-|--------|-------|------------|------|---------------|
-| `pk_categories` | `categories` | `id` | PRIMARY | Automático con PRIMARY KEY |
-| `uq_categories_name` | `categories` | `name` | UNIQUE | Evitar duplicados |
-| `pk_jokes` | `jokes` | `id` | PRIMARY | Automático con PRIMARY KEY |
-| `idx_jokes_category_id` | `jokes` | `category_id` | B-TREE | Acelerar consultas filtradas por categoría y el chiste aleatorio |
-
-El índice en `category_id` es clave para el rendimiento de la funcionalidad principal: **obtener un chiste aleatorio de una categoría**.
-
----
-
-## Datos iniciales (seed)
-
-Categorías sugeridas para el seed inicial:
-
-| Nombre | Descripción |
-|--------|-------------|
-| Humor negro | Chistes de humor oscuro y políticamente incorrectos |
-| Dad jokes | Chistes de padre, malos pero entrañables |
-| Chistes malos | Tan malos que dan la vuelta y son buenos |
-| Informática | Chistes de programadores y tecnología |
-| Animales | Chistes con protagonistas del reino animal |
-| Profesiones | Chistes sobre médicos, abogados, etc. |
-
----
-
-## SQL de creación
+## Script de creación
 
 ```sql
 -- Crear tabla de categorías
 CREATE TABLE categories (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL UNIQUE,
-    description TEXT,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+    id          SERIAL PRIMARY KEY,
+    name        VARCHAR(100) NOT NULL UNIQUE,
+    description VARCHAR(255),
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Crear tabla de chistes
 CREATE TABLE jokes (
-    id SERIAL PRIMARY KEY,
-    title VARCHAR(200) NOT NULL,
-    content TEXT NOT NULL,
-    category_id INTEGER NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    CONSTRAINT fk_jokes_category
-        FOREIGN KEY (category_id)
-        REFERENCES categories(id)
-        ON DELETE RESTRICT
+    id          SERIAL PRIMARY KEY,
+    title       VARCHAR(200) NOT NULL,
+    content     TEXT NOT NULL,
+    category_id INTEGER NOT NULL REFERENCES categories(id) ON DELETE RESTRICT,
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Índice para búsquedas por categoría
+-- Índice para optimizar búsquedas por categoría
 CREATE INDEX idx_jokes_category_id ON jokes(category_id);
 
--- Trigger para actualizar updated_at automáticamente
-CREATE OR REPLACE FUNCTION update_updated_at()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = NOW();
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trg_categories_updated_at
-    BEFORE UPDATE ON categories
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-
-CREATE TRIGGER trg_jokes_updated_at
-    BEFORE UPDATE ON jokes
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-
--- Seed de categorías iniciales
+-- Datos iniciales de ejemplo
 INSERT INTO categories (name, description) VALUES
     ('Humor negro', 'Chistes de humor oscuro y políticamente incorrectos'),
-    ('Dad jokes', 'Chistes de padre, malos pero entrañables'),
-    ('Chistes malos', 'Tan malos que dan la vuelta y son buenos'),
-    ('Informática', 'Chistes de programadores y tecnología'),
-    ('Animales', 'Chistes con protagonistas del reino animal'),
-    ('Profesiones', 'Chistes sobre médicos, abogados, etc.');
+    ('Dad jokes', 'Chistes de padre: malos pero entrañables'),
+    ('Chistes malos', 'Tan malos que dan la vuelta y hacen gracia'),
+    ('De
+
+', 'Los
+
+ de
+
+ de toda la vida'),
+    ('Informáticos', 'Chistes para
+
+ y
+
+');
+
+INSERT INTO jokes (title, content, category_id) VALUES
+    ('El colmo', '¿Cuál es el colmo de un electricista? Que su mujer se llame Luz y sus hijos le sigan la corriente.', 4),
+    ('SQL', 'Un programador entra en un bar y pide 1 cerveza, 2 cervezas, 3 cervezas... DROP TABLE cervezas;', 5);
 ```
 
 ---
 
-*Documento generado por Nicolás 🦝 — Febrero 2026*
+## Decisiones de diseño
+
+| Decisión | Justificación |
+|----------|---------------|
+| `ON DELETE RESTRICT` en la FK | Evita borrar categorías con chistes. Primero hay que mover o borrar los chistes. |
+| `TEXT` para `content` | Los chistes pueden tener longitudes muy variables. `TEXT` no tiene límite práctico en PostgreSQL. |
+| `title` en jokes | Permite identificar rápidamente un chiste en listados sin mostrar el contenido completo. |
+| Campos `created_at` / `updated_at` | Trazabilidad básica. Se pueden usar para ordenar por más recientes. |
+| Diseño simple (2 tablas) | Suficiente para los requisitos actuales. Fácilmente ampliable (tabla `users`, `favorites`, `votes`) si se necesita en el futuro. |
+
+---
+
+## Posibles ampliaciones futuras
+
+- **Tabla `users`** — Si se añade autenticación
+- **Tabla `favorites`** — Relación N:M entre users y jokes
+- **Tabla `votes`** — Puntuación de chistes
+- **Tags/Etiquetas** — Múltiples etiquetas por chiste (N:M con tabla intermedia)
+- **Campo `language`** — Para chistes en varios idiomas
