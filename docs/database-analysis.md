@@ -31,11 +31,7 @@ Almacena las categorías disponibles para clasificar los chistes.
 | `created_at` | `TIMESTAMP`              | `DEFAULT CURRENT_TIMESTAMP` | Fecha de creación                      |
 | `updated_at` | `TIMESTAMP`              | `DEFAULT CURRENT_TIMESTAMP` | Fecha de última modificación           |
 
-**Ejemplos de categorías:** Humor negro, Dad jokes, Chistes malos, De
-
-, De
-
-, Trabalenguas, etc.
+**Ejemplos de categorías:** Humor negro, Dad jokes, Chistes malos, De Lepe, De animales, Trabalenguas, etc.
 
 **Índices:**
 - `PK` en `id`
@@ -136,18 +132,8 @@ INSERT INTO categories (name, description) VALUES
     ('Humor negro', 'Chistes de humor oscuro y políticamente incorrectos'),
     ('Dad jokes', 'Chistes de padre: malos pero entrañables'),
     ('Chistes malos', 'Tan malos que dan la vuelta y hacen gracia'),
-    ('De
-
-', 'Los
-
- de
-
- de toda la vida'),
-    ('Informáticos', 'Chistes para
-
- y
-
-');
+    ('De Lepe', 'Los clásicos chistes de Lepe de toda la vida'),
+    ('Informáticos', 'Chistes para programadores y técnicos');
 
 INSERT INTO jokes (title, content, category_id) VALUES
     ('El colmo', '¿Cuál es el colmo de un electricista? Que su mujer se llame Luz y sus hijos le sigan la corriente.', 4),
