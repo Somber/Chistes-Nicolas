@@ -1,0 +1,24 @@
+services:
+  db:
+    build:
+      context: ./database
+      dockerfile: Dockerfile
+    container_name: chistes-nicolas-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-chistes}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-chistes_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-chistes_nicolas}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-chistes} -d ${POSTGRES_DB:-chistes_nicolas}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
+    driver: local

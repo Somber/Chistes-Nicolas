@@ -1,0 +1,20 @@
+# Environment variables (contienen contraseñas)
+database/.env
+.env
+
+# Volúmenes de datos
+pgdata/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node (para futuro)
+node_modules/
+dist/
