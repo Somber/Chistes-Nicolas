@@ -5,8 +5,6 @@ services:
       dockerfile: Dockerfile
     container_name: chistes-nicolas-db
     restart: unless-stopped
-    env_file:
-      - ./database/.env
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-chistes}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-chistes_secret}
