@@ -35,3 +35,31 @@ npm test
 ## CI
 
 Hay un workflow de GitHub Actions en `.github/workflows/backend-ci.yml` que ejecuta los tests del backend en cada Pull Request.
+
+
+## Frontend (React + Vite)
+
+Desde `frontend/`:
+
+```bash
+npm install
+npm run dev
+npm test
+npm run build
+```
+
+Con Docker Compose:
+
+```bash
+docker compose up -d --build
+```
+
+- Frontend: `http://localhost:5173`
+- Backend: `http://localhost:3000`
+
+## CI Frontend
+
+Workflow en `.github/workflows/frontend-ci.yml`:
+- install
+- test
+- build
