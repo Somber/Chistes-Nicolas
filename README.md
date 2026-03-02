@@ -21,3 +21,17 @@ Repositorio de chistes con gestión completa (CRUD) y consulta aleatoria por cat
 ## Autor
 
 Desarrollado por Nicolás 🦝 con la supervisión de Moi.
+
+
+## Tests backend
+
+Desde `backend/`:
+
+```bash
+npm install
+npm test
+```
+
+## CI
+
+Hay un workflow de GitHub Actions en `.github/workflows/backend-ci.yml` que ejecuta los tests del backend en cada Pull Request.
