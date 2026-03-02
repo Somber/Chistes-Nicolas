@@ -8,6 +8,11 @@ services:
     environment:
       PORT: ${BACKEND_PORT:-3000}
       NODE_ENV: ${NODE_ENV:-development}
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB:-chistes_nicolas}
+      DB_USER: ${POSTGRES_USER:-chistes}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-chistes_secret}
     ports:
       - "${BACKEND_PORT:-3000}:3000"
     depends_on:
