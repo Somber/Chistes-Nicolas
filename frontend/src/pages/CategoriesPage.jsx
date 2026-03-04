@@ -1,12 +1,24 @@
 import { useEffect, useMemo, useState } from 'react';
 import './CategoriesPage.css';
 
-const API_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3000').replace(/\/$/, '');
+const resolveApiBaseUrl = () => {
+  if (import.meta.env.VITE_API_URL) {
+    return String(import.meta.env.VITE_API_URL).replace(/\/$/, '');
+  }
+
+  if (typeof window !== 'undefined' && window.location?.hostname) {
+    return `http://${window.location.hostname}:3000`;
+  }
+
+  return 'http://localhost:3000';
+};
+
+const API_BASE_URL = resolveApiBaseUrl();
 
 async function parseError(response) {
   try {
     const body = await response.json();
-    return body?.error || `Error HTTP ${response.status}`;
+    return body?.message || body?.error || `Error HTTP ${response.status}`;
   } catch {
     return `Error HTTP ${response.status}`;
   }
