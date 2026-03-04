@@ -69,6 +69,10 @@
   background: #fafafa;
 }
 
+.datatable tbody tr:hover td {
+  background: #f3f4f6 !important;
+}
+
 .datatable tbody tr:last-child td {
   border-bottom: none;
 }
