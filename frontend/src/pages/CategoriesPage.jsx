@@ -29,6 +29,7 @@ export default function CategoriesPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
   const [formName, setFormName] = useState('');
+  const [formDescription, setFormDescription] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -77,6 +78,7 @@ export default function CategoriesPage() {
   const openNewModal = () => {
     setEditingCategory(null);
     setFormName('');
+    setFormDescription('');
     setError('');
     setSuccess('');
     setShowModal(true);
@@ -85,6 +87,7 @@ export default function CategoriesPage() {
   const openEditModal = (category) => {
     setEditingCategory(category);
     setFormName(category.name || '');
+    setFormDescription(category.description || '');
     setError('');
     setSuccess('');
     setShowModal(true);
@@ -95,6 +98,7 @@ export default function CategoriesPage() {
     setShowModal(false);
     setEditingCategory(null);
     setFormName('');
+    setFormDescription('');
   };
 
   const handleSubmit = async (e) => {
@@ -114,7 +118,7 @@ export default function CategoriesPage() {
       const response = await fetch(url, {
         method: isEditing ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: formName.trim() })
+        body: JSON.stringify({ name: formName.trim(), description: formDescription.trim() || null })
       });
 
       if (!response.ok) {
@@ -261,6 +265,15 @@ export default function CategoriesPage() {
                   onChange={(e) => setFormName(e.target.value)}
                   required
                   autoFocus
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="categoryDescription">Descripción:</label>
+                <textarea
+                  id="categoryDescription"
+                  value={formDescription}
+                  onChange={(e) => setFormDescription(e.target.value)}
+                  rows={4}
                 />
               </div>
               <div className="modal-buttons">
