@@ -37,15 +37,29 @@ export default function CategoriesPage() {
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [sortKey, setSortKey] = useState('name');
+  const [sortDir, setSortDir] = useState('asc');
 
   const itemsPerPage = 5;
 
   const totalPages = Math.max(1, Math.ceil(categories.length / itemsPerPage));
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
+  const sortedCategories = useMemo(() => {
+    const sorted = [...categories];
+    sorted.sort((a, b) => {
+      const av = String(a?.[sortKey] ?? '').toLowerCase();
+      const bv = String(b?.[sortKey] ?? '').toLowerCase();
+      if (av < bv) return sortDir === 'asc' ? -1 : 1;
+      if (av > bv) return sortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
+    return sorted;
+  }, [categories, sortKey, sortDir]);
+
   const currentCategories = useMemo(
-    () => categories.slice(startIndex, endIndex),
-    [categories, startIndex, endIndex]
+    () => sortedCategories.slice(startIndex, endIndex),
+    [sortedCategories, startIndex, endIndex]
   );
 
   const loadCategories = async () => {
@@ -175,6 +189,20 @@ export default function CategoriesPage() {
     setDeleteConfirm(null);
   };
 
+  const toggleSort = (key) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+      return;
+    }
+    setSortKey(key);
+    setSortDir('asc');
+  };
+
+  const sortIndicator = (key) => {
+    if (sortKey !== key) return '↕';
+    return sortDir === 'asc' ? '↑' : '↓';
+  };
+
   return (
     <div className="categories-page">
       <div className="page-header">
@@ -194,19 +222,29 @@ export default function CategoriesPage() {
           <table className="datatable">
             <thead>
               <tr>
-                <th>Nombre</th>
+                <th>
+                  <button className="sort-btn" onClick={() => toggleSort('name')} type="button">
+                    Nombre {sortIndicator('name')}
+                  </button>
+                </th>
+                <th>
+                  <button className="sort-btn" onClick={() => toggleSort('description')} type="button">
+                    Descripción {sortIndicator('description')}
+                  </button>
+                </th>
                 <th className="actions-col">Acciones</th>
               </tr>
             </thead>
             <tbody>
               {currentCategories.length === 0 ? (
                 <tr>
-                  <td colSpan={2}>No hay categorías todavía.</td>
+                  <td colSpan={3}>No hay categorías todavía.</td>
                 </tr>
               ) : (
                 currentCategories.map((category) => (
                   <tr key={category.id}>
                     <td>{category.name}</td>
+                    <td>{category.description || '-'}</td>
                     <td className="actions-cell">
                       <button
                         className="btn-icon btn-edit"

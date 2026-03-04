@@ -78,8 +78,21 @@
 }
 
 .actions-col {
-  width: 120px;
+  width: 140px;
   text-align: center !important;
+}
+
+.sort-btn {
+  background: transparent;
+  border: none;
+  color: #111827;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.sort-btn:hover {
+  text-decoration: underline;
 }
 
 .actions-cell {
