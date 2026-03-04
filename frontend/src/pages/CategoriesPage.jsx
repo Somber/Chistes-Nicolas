@@ -42,9 +42,6 @@ export default function CategoriesPage() {
 
   const itemsPerPage = 5;
 
-  const totalPages = Math.max(1, Math.ceil(categories.length / itemsPerPage));
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
   const sortedCategories = useMemo(() => {
     const sorted = [...categories];
     sorted.sort((a, b) => {
@@ -56,6 +53,10 @@ export default function CategoriesPage() {
     });
     return sorted;
   }, [categories, sortKey, sortDir]);
+
+  const totalPages = Math.max(1, Math.ceil(sortedCategories.length / itemsPerPage));
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
 
   const currentCategories = useMemo(
     () => sortedCategories.slice(startIndex, endIndex),
@@ -132,7 +133,10 @@ export default function CategoriesPage() {
       const response = await fetch(url, {
         method: isEditing ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: formName.trim(), description: formDescription.trim() || null })
+        body: JSON.stringify({
+          name: formName.trim(),
+          description: formDescription.trim() || null
+        })
       });
 
       if (!response.ok) {
@@ -267,7 +271,7 @@ export default function CategoriesPage() {
             </tbody>
           </table>
 
-          {categories.length > itemsPerPage && (
+          {sortedCategories.length > itemsPerPage && (
             <div className="pagination">
               <button
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}

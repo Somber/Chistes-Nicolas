@@ -261,14 +261,6 @@
   box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
 }
 
-.modal-buttons {
-  display: flex;
-  gap: 1rem;
-  justify-content: flex-end;
-  margin-top: 1.5rem;
-}
-
-
 .form-group textarea {
   width: 100%;
   padding: 0.7rem;
@@ -285,4 +277,11 @@
   outline: none;
   border-color: #4caf50;
   box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
 }
